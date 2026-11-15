@@ -114,7 +114,7 @@ internal fun MusicSidebar(
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "MUSIC",
+                    text = "MÜZİK",
                     color = MusicPalette.accentTeal,
                     fontSize = 8.sp,
                     letterSpacing = 2.2.sp,
@@ -127,7 +127,7 @@ internal fun MusicSidebar(
 
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             MusicSidebarItem(
-                label = "Home",
+                label = "Ana Sayfa",
                 icon = Icons.Default.Home,
                 selected = selectedTab == MusicTab.HOME,
                 modifier = if (selectedTab == MusicTab.HOME) {
@@ -138,7 +138,7 @@ internal fun MusicSidebar(
                 onClick = { onTabSelected(MusicTab.HOME) }
             )
             MusicSidebarItem(
-                label = "Explore",
+                label = "Keşfet",
                 icon = Icons.Default.Explore,
                 selected = selectedTab == MusicTab.EXPLORE,
                 modifier = if (selectedTab == MusicTab.EXPLORE) {
@@ -149,7 +149,7 @@ internal fun MusicSidebar(
                 onClick = { onTabSelected(MusicTab.EXPLORE) }
             )
             MusicSidebarItem(
-                label = "Library",
+                label = "Kitaplık",
                 icon = Icons.Default.LibraryMusic,
                 selected = selectedTab == MusicTab.LIBRARY,
                 modifier = if (selectedTab == MusicTab.LIBRARY) {
@@ -160,7 +160,7 @@ internal fun MusicSidebar(
                 onClick = { onTabSelected(MusicTab.LIBRARY) }
             )
             MusicSidebarItem(
-                label = "Local",
+                label = "Yerel",
                 icon = Icons.Default.Folder,
                 selected = selectedTab == MusicTab.LOCAL,
                 modifier = if (selectedTab == MusicTab.LOCAL) {
@@ -177,7 +177,7 @@ internal fun MusicSidebar(
                 onClick = onOpenWebDav
             )
             MusicSidebarItem(
-                label = "Search",
+                label = "Ara",
                 icon = Icons.Default.Search,
                 selected = selectedTab == MusicTab.SEARCH,
                 modifier = if (selectedTab == MusicTab.SEARCH) {
@@ -188,14 +188,14 @@ internal fun MusicSidebar(
                 onClick = { onTabSelected(MusicTab.SEARCH) }
             )
             MusicSidebarItem(
-                label = "Party",
+                label = "Parti",
                 icon = Icons.Default.Groups,
                 selected = false,
                 live = partyRunning,
                 onClick = onOpenParty
             )
             MusicSidebarItem(
-                label = "Integrations",
+                label = "Entegrasyonlar",
                 icon = Icons.Default.Extension,
                 selected = false,
                 onClick = onOpenIntegrations
@@ -206,7 +206,7 @@ internal fun MusicSidebar(
 
         Spacer(Modifier.height(9.dp))
         MusicSidebarItem(
-            label = "Settings",
+            label = "Ayarlar",
             icon = Icons.Default.Settings,
             selected = false,
             onClick = onOpenSettings
