@@ -70,15 +70,15 @@ import androidx.tv.material3.Icon
 import androidx.tv.material3.LocalTextStyle
 import androidx.tv.material3.Text
 import coil3.compose.AsyncImage
-import com.music.bitchord.data.model.BrowseType
 import com.music.bitchord.data.YtMusicRepository
-import com.nuvio.tv.R
+import com.music.bitchord.data.model.BrowseType
 import com.music.bitchord.data.model.HomeShelf
 import com.music.bitchord.data.model.ShelfItem
 import com.music.bitchord.data.model.Song
-import com.nuvio.tv.youtube.YouTubeAccountViewModel
 import com.nuvio.tv.LocalOpenSidebar
 import com.nuvio.tv.LocalSidebarExpanded
+import com.nuvio.tv.R
+import com.nuvio.tv.youtube.YouTubeAccountViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -1024,85 +1024,3 @@ private fun MusicAccountButton(name: String?, avatar: String?, onClick: () -> Un
         }
     }
 }
-
-@Composable
-private fun MusicPlayingIndicator(playing: Boolean, modifier: Modifier = Modifier) {
-    Box(
-        modifier
-            .size(8.dp)
-            .clip(CircleShape)
-            .background(if (playing) MusicPalette.accentTeal else MusicPalette.textSecondary.copy(alpha = 0.4f))
-    )
-}
-
-@Composable
-private fun MusicArtwork(
-    url: String?,
-    modifier: Modifier = Modifier,
-    cornerRadius: androidx.compose.ui.unit.Dp = 8.dp,
-    iconSize: androidx.compose.ui.unit.Dp = 14.dp,
-    artworkPx: Int = 256
-) {
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(cornerRadius))
-            .background(MusicPalette.surface)
-    ) {
-        if (url != null) {
-            AsyncImage(
-                model = url,
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
-            )
-        } else {
-            Box(
-                Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    Icons.Default.MusicNote,
-                    contentDescription = null,
-                    tint = MusicPalette.textSecondary,
-                    modifier = Modifier.size(iconSize)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun MusicTextButton(
-    label: String,
-    selected: Boolean = false,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    var focused by remember { mutableStateOf(false) }
-    Box(
-        modifier
-            .clip(RoundedCornerShape(50))
-            .background(if (selected) MusicPalette.accent else if (focused) MusicPalette.surfaceFocused else Color.Transparent)
-            .border(
-                1.dp,
-                when {
-                    selected -> MusicPalette.accent
-                    focused -> Color.White.copy(alpha = 0.8f)
-                    else -> Color.Transparent
-                },
-                RoundedCornerShape(50)
-            )
-            .clickable(onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 6.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = label,
-            color = if (selected) MusicPalette.background else MusicPalette.text,
-            fontSize = 11.sp,
-            fontWeight = FontWeight.SemiBold
-        )
-    }
-}
-
-private fun buildStringFromTextStyle(style: TextStyle): String = style.toString()
