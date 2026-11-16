@@ -1,6 +1,6 @@
 package com.nuvio.tv.music
 
-import com.music.bitchord.data.model.browseTypeOf
+
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -1024,4 +1024,9 @@ private fun MusicAccountButton(name: String?, avatar: String?, onClick: () -> Un
             )
         }
     }
+}
+private fun browseTypeOf(browseId: String): BrowseType = when {
+    browseId.startsWith("UC") || browseId.startsWith("FEmusic_library_privately_owned_artist") -> BrowseType.ARTIST
+    browseId.startsWith("MPRE") || browseId.startsWith("OLAK5uy_") -> BrowseType.ALBUM
+    else -> BrowseType.PLAYLIST
 }
