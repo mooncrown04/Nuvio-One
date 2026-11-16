@@ -443,7 +443,7 @@ fun MusicScreen(
                                 )
                             }
                         },
-                        onLoadMore = viewModel::loadMoreHome,
+                        onLoadMore = viewModel::loadHome,
                         onRetry = viewModel::loadHome
                     )
                     state.tab == MusicTab.EXPLORE -> MusicExploreScreen(
@@ -751,7 +751,7 @@ private fun MusicNavigationPill(
         horizontalArrangement = Arrangement.spacedBy(2.dp)
     ) {
         MusicTopNavItem(
-            label = "Home",
+            label = "Ana Sayfa",
             selected = selectedTab == MusicTab.HOME,
             modifier = if (selectedTab == MusicTab.HOME) {
                 Modifier.focusRequester(initialFocus)
@@ -762,7 +762,7 @@ private fun MusicNavigationPill(
             onClick = { onTabSelected(MusicTab.HOME) }
         )
         MusicTopNavItem(
-            label = "Explore",
+            label = "Keşfet",
             selected = selectedTab == MusicTab.EXPLORE,
             modifier = if (selectedTab == MusicTab.EXPLORE) {
                 Modifier.focusRequester(initialFocus)
@@ -772,7 +772,7 @@ private fun MusicNavigationPill(
             onClick = { onTabSelected(MusicTab.EXPLORE) }
         )
         MusicTopNavItem(
-            label = "Library",
+            label = "Kitaplık",
             selected = selectedTab == MusicTab.LIBRARY,
             modifier = if (selectedTab == MusicTab.LIBRARY) {
                 Modifier.focusRequester(initialFocus)
@@ -782,7 +782,7 @@ private fun MusicNavigationPill(
             onClick = { onTabSelected(MusicTab.LIBRARY) }
         )
         MusicTopNavItem(
-            label = "Local",
+            label = "Yerel",
             selected = selectedTab == MusicTab.LOCAL,
             modifier = if (selectedTab == MusicTab.LOCAL) {
                 Modifier.focusRequester(initialFocus)
@@ -792,7 +792,7 @@ private fun MusicNavigationPill(
             onClick = { onTabSelected(MusicTab.LOCAL) }
         )
         MusicTopNavItem(
-            label = "Search",
+            label = "Ara",
             selected = selectedTab == MusicTab.SEARCH,
             modifier = if (selectedTab == MusicTab.SEARCH) {
                 Modifier.focusRequester(initialFocus)
@@ -802,13 +802,13 @@ private fun MusicNavigationPill(
             onClick = { onTabSelected(MusicTab.SEARCH) }
         )
         MusicTopNavItem(
-            label = "Party",
+            label = "Parti",
             selected = false,
             live = partyRunning,
             onClick = onOpenParty
         )
         MusicTopNavItem(
-            label = "Integrations",
+            label = "Entegrasyonlar",
             selected = false,
             onClick = onOpenIntegrations
         )
@@ -827,7 +827,7 @@ private fun MusicBrand(modifier: Modifier = Modifier) {
         )
         Spacer(Modifier.width(9.dp))
         Text(
-            text = "Nuvio One Music",
+            text = "Nuvio One Müzik",
             color = MusicPalette.text,
             fontSize = 13.sp,
             fontWeight = FontWeight.Bold,
@@ -1010,26 +1010,99 @@ private fun MusicAccountButton(name: String?, avatar: String?, onClick: () -> Un
         if (avatar != null) {
             AsyncImage(
                 model = avatar,
-                contentDescription = name ?: "YouTube Music account",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize().clip(CircleShape)
+                contentDescription = name ?: "Music account",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
             )
         } else {
             Icon(
                 Icons.Default.AccountCircle,
-                contentDescription = if (name == null) "Sign in to YouTube Music" else name,
+                contentDescription = name ?: "Music account",
                 tint = if (focused) MusicPalette.text else MusicPalette.textSecondary,
-                modifier = Modifier.size(20.dp)
+                modifier = Modifier.size(18.dp)
             )
         }
     }
 }
 
-/** The browse id prefixes YouTube Music uses, for cards that don't carry a type. */
-private fun browseTypeOf(browseId: String): BrowseType = when {
-    browseId.startsWith("MPREb") -> BrowseType.ALBUM
-    browseId.startsWith("UC") -> BrowseType.ARTIST
-    browseId.startsWith("VL") || browseId.startsWith("PL") ||
-        browseId.startsWith("OLAK5uy_") -> BrowseType.PLAYLIST
-    else -> BrowseType.OTHER
+@Composable
+private fun MusicPlayingIndicator(playing: Boolean, modifier: Modifier = Modifier) {
+    Box(
+        modifier
+            .size(8.dp)
+            .clip(CircleShape)
+            .background(if (playing) MusicPalette.accentTeal else MusicPalette.textSecondary.copy(alpha = 0.4f))
+    )
 }
+
+@Composable
+private fun MusicArtwork(
+    url: String?,
+    modifier: Modifier = Modifier,
+    cornerRadius: androidx.compose.ui.unit.Dp = 8.dp,
+    iconSize: androidx.compose.ui.unit.Dp = 14.dp,
+    artworkPx: Int = 256
+) {
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(cornerRadius))
+            .background(MusicPalette.surface)
+    ) {
+        if (url != null) {
+            AsyncImage(
+                model = url,
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+        } else {
+            Box(
+                Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    Icons.Default.MusicNote,
+                    contentDescription = null,
+                    tint = MusicPalette.textSecondary,
+                    modifier = Modifier.size(iconSize)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun MusicTextButton(
+    label: String,
+    selected: Boolean = false,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var focused by remember { mutableStateOf(false) }
+    Box(
+        modifier
+            .clip(RoundedCornerShape(50))
+            .background(if (selected) MusicPalette.accent else if (focused) MusicPalette.surfaceFocused else Color.Transparent)
+            .border(
+                1.dp,
+                when {
+                    selected -> MusicPalette.accent
+                    focused -> Color.White.copy(alpha = 0.8f)
+                    else -> Color.Transparent
+                },
+                RoundedCornerShape(50)
+            )
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = label,
+            color = if (selected) MusicPalette.background else MusicPalette.text,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.SemiBold
+        )
+    }
+}
+
+private fun buildStringFromTextStyle(style: TextStyle): String = style.toString()
