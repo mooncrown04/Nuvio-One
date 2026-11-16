@@ -1,0 +1,111 @@
+name: Fork Debug APK
+
+on:
+  push:
+    branches: [main, dev]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v6
+
+      - name: Check TR string translations
+        run: |
+          python3 - << 'EOF'
+          import glob
+          import os
+          import xml.etree.ElementTree as ET
+
+          base_files = glob.glob("**/src/main/res/values/strings.xml", recursive=True)
+          if not base_files:
+              print("values/strings.xml bulunamadi.")
+              raise SystemExit(0)
+
+          summary_lines = ["## Türkçe Çeviri (`values-tr`) Eksik Kontrolü", ""]
+          has_report = False
+
+          for base_path in sorted(base_files):
+              tr_path = base_path.replace("/values/", "/values-tr/")
+              if not os.path.exists(tr_path):
+                  summary_lines.append(f"- `{tr_path}` dosyasi bulunamadi.")
+                  has_report = True
+                  continue
+
+              base_root = ET.parse(base_path).getroot()
+              tr_root = ET.parse(tr_path).getroot()
+
+              base_strings = {}
+              for el in base_root.findall("string"):
+                  name = el.attrib.get("name")
+                  if name and el.attrib.get("translatable", "true") != "false":
+                      base_strings[name] = "".join(el.itertext())
+
+              tr_strings = {}
+              for el in tr_root.findall("string"):
+                  name = el.attrib.get("name")
+                  if name:
+                      tr_strings[name] = "".join(el.itertext())
+
+              missing = sorted(set(base_strings.keys()) - set(tr_strings.keys()))
+              empty = sorted(k for k, v in tr_strings.items() if k in base_strings and not v.strip())
+
+              if missing or empty:
+                  has_report = True
+                  summary_lines.append(f"### `{tr_path}`")
+                  if missing:
+                      summary_lines.append(f"- **Eksik anahtar ({len(missing)}):** " + ", ".join(f"`{m}`" for m in missing[:40]) + (" ..." if len(missing) > 40 else ""))
+                  if empty:
+                      summary_lines.append(f"- **Boş çeviri ({len(empty)}):** " + ", ".join(f"`{e}`" for e in empty[:40]) + (" ..." if len(empty) > 40 else ""))
+                  summary_lines.append("")
+
+          if not has_report:
+              summary_lines.append("Tüm `values-tr/strings.xml` dosyalarinda eksik veya bos anahtar bulunmadi.")
+
+          report = "\n".join(summary_lines)
+          print(report)
+          summary_file = os.environ.get("GITHUB_STEP_SUMMARY")
+          if summary_file:
+              with open(summary_file, "a", encoding="utf-8") as f:
+                  f.write(report + "\n")
+          EOF
+
+      - name: Create minimal local.properties
+        run: |
+          printf 'TRAKT_CLIENT_ID=dummy\nTRAKT_CLIENT_SECRET=dummy\n' > local.properties
+
+      - name: Generate debug keystore
+        run: |
+          keytool -genkeypair -v \
+            -keystore nuviotv.jks \
+            -alias androiddebugkey \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -storepass android \
+            -keypass android \
+            -dname "CN=Android Debug,O=Android,C=US"
+
+      - name: Build Debug APK
+        run: >
+          ./gradlew :app:assembleFullDebug
+          -Pandroid.injected.signing.store.file=$GITHUB_WORKSPACE/nuviotv.jks
+          -Pandroid.injected.signing.store.password=android
+          -Pandroid.injected.signing.key.alias=androiddebugkey
+          -Pandroid.injected.signing.key.password=android
+          --stacktrace
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v6
+        with:
+          name: nuviotv-fork-debug
+          path: app/build/outputs/apk/full/debug/*.apk
+          if-no-files-found: error
